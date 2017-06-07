@@ -1,5 +1,8 @@
 Pruebas realizadas:
-- Inicializar los pesos aleatoriamente con e
+
+DataSet Mnist (imágenes)
+
+- Inicializar los pesos aleatoriamente con un epsilon inicial
 - entradas normalizadas
 - nTraining = 60000
 - nTest = 10000
@@ -11,6 +14,19 @@ Pruebas realizadas:
 - tolerancia de Error = 0.0001
 - Precision = 0.9299
 
+DataSet Iris :
+
+- Inicializar los pesos aleatoriamente con un epsilon inicial
+- entradas normalizadas
+- nTraining = 105
+- nTest = 45
+- RED:
+    - nInput: 4
+    - nOutput: 3
+    - nHidden: 2(8 neurons)
+- iteraciones = 189
+- tolerancia de Error = 0.0001
+- Precision = 1
 
 
     
