@@ -29,6 +29,10 @@ public:
 
     vec mGradient;
 
+    mat mDeltaWeights;
+
+    mat mDeltaWeightsSum;
+
 
     int mSize=0;
 
@@ -39,6 +43,9 @@ public:
 
     double (*mActivationFunction) (double )=0;
     double (*mGradientFunction) (double )=0;
+
+
+
 
 };
 
