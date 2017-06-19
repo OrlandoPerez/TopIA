@@ -7,11 +7,11 @@
 class NeuralNetwork
 {
 public:
-    NeuralNetwork(int nInputs,  int hiddenLayerSize, int nHiddenLayers, int nOutputs, double (*activationFunction)(double),double (*gradientFunction)(double));
+    NeuralNetwork(int nInputs,  vector<int> hiddenLayers, int nOutputs, double (*activationFunction)(double), double (*gradientFunction)(double));
     ~NeuralNetwork(){}
 
-    int computeOutput(vec input);
-    void backpropagation(vector<vec> &trainingSet);
+    int computeOutput(vec &input);
+    void backpropagation(vector<vec> &trainingInput, vector<vec> &trainingOutput, double momentum=0);
 
 
     vector<Layer> mLayers;
@@ -22,6 +22,9 @@ public:
 
     double mLearningRate=0.1;
 
+
+
+    void backpropagationMiniBatch(vector<vec> &trainingInput, vector<vec> &trainingOutput, int batchSize, double momentum=0);
 };
 
 #endif // NEURALNETWORK_H
