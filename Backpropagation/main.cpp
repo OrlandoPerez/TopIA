@@ -8,7 +8,12 @@
 using namespace cimg_library;
 
 
-const int mySize =784;
+
+const int inputSize =784;
+const int outputSize =10;
+
+//const int inputSize =4;
+//const int outputSize =3;
 
 
 double sigmoid(double x){
@@ -20,7 +25,7 @@ double sigmoidGradient(double x){
 }
 
 
-void loadData(string fileName, vector<vec>& set ){
+void loadData(string fileName, vector<vec>& trainingInput,vector<vec>& trainingOutput ){
 
 
     string line;
@@ -31,29 +36,64 @@ void loadData(string fileName, vector<vec>& set ){
         {
             std::stringstream pixels(line);
             int index = 0;
-            vec input = zeros(mySize+10);
+            vec input = zeros(inputSize);
+            vec output= zeros(outputSize);
 
             for (std::string dato; std::getline(pixels,dato, ','); )
             {
                 if(index==0)
+                //if (index<inputSize)
                 {
-                    input[input.size()-(10-atoi(dato.c_str()))] = 1  ;
+                    output[atoi(dato.c_str())] = 1  ;
+                   // input[index] = atof(dato.c_str())  ;
                     ++index;
+
                 }
                 else
                 {
-                    //cout<<dato<<endl;
-                    input[index-1] = atoi(dato.c_str())>127;
+                    //output[index-inputSize] = atof(dato.c_str());
+                    input[index-1] = atof(dato.c_str());
                     ++index;
                 }
 
             }
-            set.push_back(input);
+            trainingInput.push_back(input);
+            trainingOutput.push_back(output);
+
         }
         fileIn.close();
     }
 
     else cout << "No se encuentra el archivo..."<<endl;
+
+}
+
+void normalize(vector<vec>& set){
+
+    vector<double> min(inputSize,100000.0);
+    vector<double> max(inputSize,-100000.0);
+
+    double d1=0;
+    double d2=1;
+
+    for (unsigned int i =0;i<set.size();++i){
+        for (int j =0;j<inputSize;++j){
+            if (min[j]> set[i][j]){
+                min[j]=set[i][j];
+            }
+            if (max[j]< set[i][j])
+                max[j]=set[i][j];
+        }
+    }
+    for(unsigned int i =0;i<set.size();++i){
+        for (int j =0;j<inputSize;++j){
+            if (max[j]-min[j])
+                set[i][j]=(((set[i][j]-min[j])*(d2-d1))/(max[j]-min[j]))+d1;
+            else
+                set[i][j]=d1;
+
+        }
+    }
 
 }
 
@@ -64,49 +104,68 @@ int main(int argc, char *argv[])
     //QApplication a(argc, argv);
     //MainWindow w;
     //w.show();
-
     //return a.exec();
-    //cout<<sigmoid(1)<<endl;
-    //cout<<sigmoidGradient(1)<<endl;
-    arma_rng::set_seed_random();
-    NeuralNetwork n(mySize,35,1,10,&sigmoid,&sigmoidGradient);
 
-   /* vector<vec> set={
-        {1,3,4},{5,6,3},{200,1,7},{0,5,9}
+    arma_rng::set_seed_random();
+    NeuralNetwork n(inputSize,{35},outputSize,&sigmoid,&sigmoidGradient);
+
+    //NeuralNetwork n(2,{2},1,&sigmoid,&sigmoidGradient);
+
+    //NeuralNetwork n(inputSize,{8,8},outputSize,&sigmoid,&sigmoidGradient);
+
+   /* vector<vec> inputSet={
+        {0,0},{0,1},{1,0},{1,1}
+    };
+
+    vector<vec> outputSet={
+        {0},{1},{1},{0}
     };*/
 
-    vector<vec> dataSet;
+    vector<vec> inputTraining;
+    vector<vec> outputTraining;
 
-    //loadData("DataSet/mnist_train_100.csv",dataSet);
-    loadData("DataSet/mnist_train.csv",dataSet);
+    loadData("DataSet/mnist_train_100.csv",inputTraining,outputTraining);
+    //loadData("DataSet/irisdataTrain",inputTraining,outputTraining);
+    //loadData("DataSet/mnist_train.csv",inputTraining,outputTraining);
 
-
-    //dataSet[0].print("vamo a ver");
-
-
-    //cout<<dataSet.size()<<endl;computeOutput
-
-    //cout<<dataSet.front().size()<<endl;
-    n.backpropagation(dataSet);
-
-    vector<vec> test;
-    loadData("DataSet/mnist_test_10.csv",test);
-    //loadData("DataSet/mnist_test.csv",test);
+    normalize(inputTraining);
 
 
-    int count=0;
-     for (vec &t:test){
-        //cout<<test.size()<<endl;
-        int best=n.computeOutput(t.subvec(0,t.size()-11));
+    //n.backpropagationMiniBatch(inputTraining,outputTraining,10);
+    n.backpropagation(inputTraining,outputTraining);
+
+    //n.backpropagation(inputSet,outputSet);
+
+    vector<vec> inputTest;
+    vector<vec> outputTest;
+
+/*    vector<vec> inputTest={
+        {0,0},{1,0},{0,1},{1,1}
+    };
+
+    vector<vec> outputTest={
+        {0},{1},{1},{0}
+    };
+*/
+
+    loadData("DataSet/mnist_test_10.csv",inputTest,outputTest);
+    //loadData("DataSet/irisdataTest",inputTest,outputTest);
+    //loadData("DataSet/mnist_test.csv",inputTest,outputTest);
 
 
-        for (int i=1;i<t.subvec(t.size()-10,t.size()-1).n_elem;++i){
-            if(t.subvec(t.size()-10,t.size()-1)[i]){
-                if(best==i)
-                    ++count;
-            }
-        }
+    normalize(inputTest);
 
+    cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+    double count=0;
+     for (int i=0;i<inputTest.size();++i){
+         int best=n.computeOutput(inputTest[i]);
+
+         for (int j =0;j<outputTest[i].size();++j){
+             if(outputTest[i][j]){
+                 if(best==j)
+                     ++count;
+             }
+         }
 
 
        /* CImg<unsigned char> digit(28,28,1,1,1);
@@ -118,23 +177,11 @@ int main(int argc, char *argv[])
         digit.display();*/
 
     }
-     cout<<"Accuracy: "
-           ""<<count/10.0<<endl;
 
-    /*vec a={{1,2,3}};
-    mat b={{4,2,3}};
+    cout<<inputTraining.size()<<" test : "<<inputTest.size()<<" Accuracy: "<<count/inputTest.size()<<endl;
 
-    a.print("a");
-    b.print("b");
-    mat c=a*b;
-    c.print("c");*/
-    //+=4;
-    //a.print("a");
-    //cout<<a.<<endl;
-
-
-    //n.computeOutput({1,0});
 
 
     return 0;
 }
+
