@@ -11,7 +11,10 @@ Layer::Layer(int size, int nIn, int nOut, double (*activationFunction)(double),d
 
     ramdomWeitghs(nIn,size);
 
-    //mWeights.print(to_string(nIn)+" , "+to_string(size));
+    mDeltaWeights=mat(size,nIn+1,fill::zeros);
+
+    mDeltaWeightsSum=mat(size,nIn+1,fill::zeros);
+
 
 }
 
@@ -20,11 +23,11 @@ void Layer::ramdomWeitghs(int nIn,int nOut)
     mWeights.clear();
 
     if (nIn){
-        //double eInit=sqrt(6)/sqrt(nIn+nOut);
+        double eInit=sqrt(6)/sqrt(nIn+nOut);
 
-        //mWeights=mat(nOut,nIn+1,fill::randu)* 2 *eInit -eInit;
+        mWeights=mat(nOut,nIn+1,fill::randu)* 2 *eInit -eInit;
         //mWeights=mat(nOut,nIn+1,fill::randu);
-        mWeights=mat(nOut,nIn+1,fill::zeros);
+        //mWeights=mat(nOut,nIn+1,fill::zeros);
     }
 
 }
